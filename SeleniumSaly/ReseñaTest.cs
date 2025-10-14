@@ -11,7 +11,9 @@ namespace SeleniumSaly
     {
         private IWebDriver driver;
         private const string AppUrl = "http://frontend-beautysaly.somee.com/";
-        
+
+
+        // Inicializa el controlador del navegador antes de cada prueba
         [TestInitialize]
         public void Setup()
         {
@@ -19,6 +21,7 @@ namespace SeleniumSaly
             
         }
 
+        // Propiedad para el contexto de la prueba
         public TestContext TestContext { get; set; }
 
         [TestMethod]
@@ -29,7 +32,7 @@ namespace SeleniumSaly
             
             System.Threading.Thread.Sleep(1000);
 
-            //Agrega los datos de inicio de sesión y accede a la aplicación
+            //Agrega las credenciales para poder iniciar sesión y acceder a la aplicación
             IWebElement InputEmail = driver.FindElement(By.Id("inputemail"));
             InputEmail.Clear();
             InputEmail.SendKeys("profemarvin@gmail.com");
@@ -51,6 +54,7 @@ namespace SeleniumSaly
 
             System.Threading.Thread.Sleep(1000);
 
+            //navega a la vista "Sobre Nosotros"
             IWebElement BtnReseña = driver.FindElement(By.Id("btnCalificar"));
             BtnReseña.Click();
 
@@ -63,7 +67,7 @@ namespace SeleniumSaly
 
             IWebElement InputTrabajador = driver.FindElement(By.Id("InputTrabajador"));
             InputTrabajador.Clear();
-            InputTrabajador.SendKeys("");
+            InputTrabajador.SendKeys("Antonio");
 
             IWebElement InputCalificacion = driver.FindElement(By.Id("InputCalificacion"));
             InputCalificacion.Clear();
@@ -75,11 +79,13 @@ namespace SeleniumSaly
 
             System.Threading.Thread.Sleep(1000);
 
+            // Envía el formulario de reseña
             IWebElement BtnEnviar = driver.FindElement(By.Id("btnEnviar"));
             BtnEnviar.Click();
 
             System.Threading.Thread.Sleep(1000);
 
+            // Verifica que la reseña fue enviada exitosamente y se redirigió a la vista "Sobre Nosotros"
             try
             {
                 // Espera hasta que la URL contenga "/sobrenosotros" para confirmar que la reseña fue enviada exitosamente
