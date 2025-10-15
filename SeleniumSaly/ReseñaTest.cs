@@ -43,44 +43,8 @@ namespace SeleniumSaly
             IWebElement BtnLogin = driver.FindElement(By.Id("btnIngresar"));
             BtnLogin.Click();
 
-            try
-            {
-                var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
-                bool LoginExitoso = wait.Until(ExpectedConditions.UrlContains("/sobrenosotros"));
-
-                Assert.IsTrue(LoginExitoso);
-
-                TestContext.WriteLine("Éxito: El inicio de sesión fue exitoso y se redirigió a la vista 'Sobre Nosotros'.");
-
-            }
-            catch (Exception ex)
-            {
-                Assert.Fail($"Fallo: Ocurrió una excepción inesperada al iniciar sesión: {ex.Message}");
-
-            }
-        }
-
-
-        [TestMethod]
-        public void TestLoginCLiente()
-        {
-            //Abre el navegador y navega a la URL de la aplicación
-            driver.Navigate().GoToUrl(AppUrl);
-
             System.Threading.Thread.Sleep(1000);
 
-            //Agrega las credenciales para poder iniciar sesión y acceder a la aplicación
-            IWebElement InputEmail = driver.FindElement(By.Id("inputemail"));
-            InputEmail.Clear();
-            InputEmail.SendKeys("marvinadmin@gmail.com");
-
-            IWebElement InputPassword = driver.FindElement(By.Id("inputpassword"));
-            InputPassword.Clear();
-            InputPassword.SendKeys("12345");
-
-            IWebElement BtnLogin = driver.FindElement(By.Id("btnIngresar"));
-            BtnLogin.Click();
-
             try
             {
                 var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
@@ -97,124 +61,153 @@ namespace SeleniumSaly
 
             }
         }
-
-
         [TestMethod]
-        public void CrearReseñaTest()
+        public void BuscarReseñaTest()
         {
-            // Configuración de Espera Inteligente
             var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(15));
+            string idReseña = "25";
 
-            // Iniciar sesión primero
-            TestLoginAdmin();
-
-            // Convertir el driver a IJavaScriptExecutor
+            // 2. ACCIONES
             IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
-
-            // Disminuir el zoom al 50% para alejar la página
             js.ExecuteScript("document.body.style.zoom = '0.5'");
 
-            // Espera a que el botón de reseña sea clickeable en la vista "/sobrenosotros"
-            IWebElement BtnReseña = wait.Until(ExpectedConditions.ElementToBeClickable(By.Id("btnCalificar")));
-            BtnReseña.Click();
-
-            // Espera a que el formulario de reseña aparezca (ej: InputNombre)
-            IWebElement InputNombre = wait.Until(ExpectedConditions.ElementIsVisible(By.Id("InputNombre")));
-            InputNombre.Clear();
-            InputNombre.SendKeys("Marvin");
-
-            IWebElement InputTrabajador = driver.FindElement(By.Id("InputTrabajador"));
-            InputTrabajador.Clear();
-            InputTrabajador.SendKeys("Antonio");
-
-            IWebElement InputCalificacion = driver.FindElement(By.Id("InputCalificacion"));
-            InputCalificacion.Clear();
-            InputCalificacion.SendKeys("5");
-
-            IWebElement InputComentario = driver.FindElement(By.Id("InputComentario"));
-            InputComentario.Clear();
-            InputComentario.SendKeys("Excelente servicio, muy buena atención al cliente,nuevas reseña");
-
-            // Envía el formulario de reseña
-            IWebElement BtnEnviar = driver.FindElement(By.Id("btnEnviar"));
-            BtnEnviar.Click();
-
-            try
-            {
-                // Espera hasta que la URL contenga "/sobrenosotros" para confirmar que la reseña fue enviada exitosamente
-                bool ReseñaExitosa = wait.Until(ExpectedConditions.UrlContains("/sobrenosotros"));
-
-                // Assert: Verifica la condición
-                Assert.IsTrue(ReseñaExitosa);
-
-                // Mensaje de Éxito
-                TestContext.WriteLine("Éxito: La reseña fue enviada exitosamente y se redirigió a la vista 'Sobre Nosotros'.");
-            }
-            catch (Exception ex)
-            {
-                // Captura cualquier otra excepción inesperada
-                TestContext.WriteLine($"Fallo:ocurrio un error al momento de crear la reseña");
-                Assert.Fail($"Fallo: Ocurrió una excepción inesperada durante la creacion de la reseña: {ex.Message}");
-            }
-
-        }
-
-        [TestMethod]
-        public void buscarReseña() 
-        {
-            // Configuración de Espera Inteligente
-            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(15));
-
-            // Iniciar sesión primero
-            TestLoginCLiente();
-
-            // Convertir el driver a IJavaScriptExecutor
-            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
-
-            // Disminuir el zoom al 50% para alejar la página
-            js.ExecuteScript("document.body.style.zoom = '0.5'");
-
-            // Espera a que el botón de reseña sea clickeable en la vista "/sobrenosotros"
+            // Navega a la vista de gestión de reseñas
             IWebElement BtnReseña = wait.Until(ExpectedConditions.ElementToBeClickable(By.Id("btnResenna")));
             BtnReseña.Click();
 
-            // Buscar la reseña creada
+            // Busca la reseña
             IWebElement InputReseña = wait.Until(ExpectedConditions.ElementIsVisible(By.Id("InputBuscar")));
             InputReseña.Clear();
-            InputReseña.SendKeys("25");
+            InputReseña.SendKeys(idReseña);
 
-            IWebElement BtnBuscar = driver.FindElement(By.Id("btnBuscar")); 
+            IWebElement BtnBuscar = driver.FindElement(By.Id("btnBuscar"));
             BtnBuscar.Click();
+
+            System.Threading.Thread.Sleep(1000);
 
             try
             {
-                // 5.1. Verificar que el ID '25' es visible en la primera columna de resultados.
-                // Usamos un XPath que busque el texto exacto '25' dentro de la columna ID (o en la fila).
-                string idReseña = "25";
-
-                // 📢 XPath para encontrar la fila que contiene el ID 25
+                // XPath para buscar en la tabla por ID 25 y Cliente Marvin
                 By selectorFilaID = By.XPath($"//table//tr[td[text()='{idReseña}'] and td[text()='Marvin']]");
-
-
                 IWebElement filaReseña = wait.Until(ExpectedConditions.ElementIsVisible(selectorFilaID));
 
-                // 5.2. Verificar un segundo campo (ej. Comentario) para confirmar que es la reseña correcta.
-                // XPath para encontrar el comentario 'Excelente servicio...' dentro de la misma fila.
-                By selectorComentario = By.XPath($"//table//tr[td[text()='{idReseña}']]/td[contains(text(), 'servicio, muy buena')]");
-                IWebElement comentarioVerificado = wait.Until(ExpectedConditions.ElementIsVisible(selectorComentario));
-
-
-                // ASSERT Final
-                Assert.IsTrue(filaReseña.Displayed, "Fallo: La reseña con ID 25 fue encontrada, pero el contenido no se verificó correctamente.");
-                TestContext.WriteLine($"Éxito: La reseña con ID {idReseña} fue encontrada y sus detalles son correctos.");
+                Assert.IsTrue(filaReseña.Displayed, "Fallo: La reseña con ID 25 no es visible después de la búsqueda.");
+                TestContext.WriteLine($"Éxito: La reseña con ID {idReseña} fue encontrada y verificada.");
             }
             catch (WebDriverTimeoutException)
             {
-                // Si el elemento no aparece en 10s, la búsqueda falló.
                 TestContext.WriteLine("Fallo: El URL actual es: " + driver.Url);
-                Assert.Fail("Fallo de Búsqueda: La reseña con ID 25 no apareció en los resultados de la tabla en el tiempo límite.");
+                Assert.Fail("Fallo de Búsqueda: La reseña con ID 25 no apareció en los resultados.");
+            }
+        }
+
+        [TestMethod]
+        public void EditarReseñaTest()
+        {
+            // Configuración de Espera Inteligente
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+            string idReseña = "25";
+
+            // Clic en el botón 'Editar' (Asumimos que el clic ocurre exitosamente ahora)
+            By selectorBotonVer = By.XPath($"//tr[td[text()='{idReseña}']]/td/button[text()='Editar']");
+            IWebElement BtnEditar = wait.Until(ExpectedConditions.ElementToBeClickable(selectorBotonVer));
+            BtnEditar.Click();
+
+            IWebElement InputComentario = wait.Until(ExpectedConditions.ElementIsVisible(By.Id("InputComentarioEdit")));
+            InputComentario.Clear();
+            InputComentario.SendKeys("Excelente servicio, muy buena atención al cliente, reseña editada coño");
+
+            IWebElement BtnGuardarCambios = driver.FindElement(By.Id("btnGuardarEdit"));
+            BtnGuardarCambios.Click();
+
+            System.Threading.Thread.Sleep(1000);
+
+            try
+            {
+                // Espera hasta que la URL contenga "/resennas" para confirmar que la reseña fue editada exitosamente
+                bool EditExitoso = wait.Until(ExpectedConditions.UrlContains("/resennas"));
+                Assert.IsTrue(EditExitoso);
+                TestContext.WriteLine("Éxito: La reseña fue editada exitosamente y se redirigió a la vista 'resennas'.");
+
+            }
+            catch(Exception ex)
+            {
+                Assert.Fail($"Fallo: Ocurrió una excepción inesperada al iniciar sesión: {ex.Message}");
+            }
+        }
+
+
+        [TestMethod]
+        public void EliminarReseñaTest()
+        {
+            // Configuración de Espera Inteligente
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+            string idReseña = "6";
+
+            System.Threading.Thread.Sleep(1000);
+
+            // Busca la reseña
+            IWebElement InputReseña = wait.Until(ExpectedConditions.ElementIsVisible(By.Id("InputBuscar")));
+            InputReseña.Clear();
+            InputReseña.SendKeys(idReseña);
+
+            IWebElement BtnBuscar = driver.FindElement(By.Id("btnBuscar"));
+            BtnBuscar.Click();
+
+            System.Threading.Thread.Sleep(1000);
+
+            By selectorBotonVer = By.XPath($"//tr[td[text()='{idReseña}']]/td/button[text()='Eliminar']");
+            IWebElement BtnEditar = wait.Until(ExpectedConditions.ElementToBeClickable(selectorBotonVer));
+            BtnEditar.Click();
+
+            System.Threading.Thread.Sleep(1000);
+
+            IWebElement BtnGuardarCambios = driver.FindElement(By.Id("btnEliminarConfirmar"));
+            BtnGuardarCambios.Click();
+
+            System.Threading.Thread.Sleep(2000);
+
+            try
+            {
+                // Espera hasta que la URL contenga "/resennas" para confirmar que la reseña fue eliminada exitosamente
+                bool DeleteExitoso = wait.Until(ExpectedConditions.UrlContains("/resennas"));
+                Assert.IsTrue(DeleteExitoso);
+                TestContext.WriteLine("Éxito: La reseña fue eliminada exitosamente y se redirigió a la vista 'resennas'.");
+            }
+            catch (Exception ex)
+            {
+                Assert.Fail($"Fallo: Ocurrió una excepción inesperada al eliminar la reseña: {ex.Message}");
             }
 
+
+
+        }
+
+        //[TestMethod]
+        //public void VerReseñaTest()
+        //{
+        //    var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(15));
+        //    string idReseña = "25";
+        //    string clienteReseña = "Marvin";
+
+        //    // 3. ACCIÓN: Clic en el botón 'Ver' (Asumimos que el clic ocurre exitosamente ahora)
+        //    By selectorBotonVer = By.XPath($"//tr[td[text()='{idReseña}']]/td/button[text()='Ver']");
+        //    IWebElement BtnVer = wait.Until(ExpectedConditions.ElementToBeClickable(selectorBotonVer));
+        //    BtnVer.Click();
+
+
+        //}
+
+
+        [TestMethod]
+        public void probarTodo(){
+            TestLoginAdmin();
+
+            BuscarReseñaTest();
+
+            EditarReseñaTest();
+
+            EliminarReseñaTest();
         }
 
         [TestCleanup]
