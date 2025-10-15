@@ -81,7 +81,7 @@ namespace SeleniumSaly
                 btnCrearNuevo.Click();
 
                 // 4️⃣ Seleccionar un servicio del combo
-                IWebElement selectServicio = wait.Until(ExpectedConditions.ElementIsVisible(By.TagName("select")));
+                IWebElement selectServicio = wait.Until(ExpectedConditions.ElementIsVisible(By.TagName("selectServicio")));
                 var select = new SelectElement(selectServicio);
                 select.SelectByIndex(1); // selecciona el segundo servicio
 
