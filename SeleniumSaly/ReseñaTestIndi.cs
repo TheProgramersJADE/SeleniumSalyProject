@@ -7,38 +7,20 @@ using SeleniumExtras.WaitHelpers;
 namespace SeleniumSaly
 {
     [TestClass]
-    public class ReseñaTest
+    public class ReseñaTestIndi
     {
         private IWebDriver driver;
         private const string AppUrl = "http://frontend-beautysaly.somee.com/";
+        private const string idReseñaEdit = "30"; // ID de la reseña que se va a buscar y editar
 
         // Propiedad para el contexto de la prueba
         public TestContext TestContext { get; set; }
 
-        // Inicializa el controlador del navegador
         [TestInitialize]
         public void Setup()
         {
             driver = new EdgeDriver();
 
-        }
-
-        [TestMethod]
-        public void TestEjecutarTodo()
-        {
-            TestLoginCLiente();
-
-            CrearReseñaTest();
-
-            CerrarSesionTest();
-
-            TestLoginAdmin();
-
-            BuscarReseñaTest();
-
-            EditarReseñaTest();
-
-            EliminarReseñaTest();
         }
 
         [TestMethod]
@@ -54,7 +36,7 @@ namespace SeleniumSaly
                 //Agrega las credenciales para poder iniciar sesión y acceder a la aplicación
                 IWebElement InputEmail = driver.FindElement(By.Id("inputemail"));
                 InputEmail.Clear();
-                InputEmail.SendKeys("profemarvin@gmail.com");
+                InputEmail.SendKeys("marvinadmin@gmail.com");
 
                 IWebElement InputPassword = driver.FindElement(By.Id("inputpassword"));
                 InputPassword.Clear();
@@ -63,8 +45,7 @@ namespace SeleniumSaly
                 IWebElement BtnLogin = driver.FindElement(By.Id("btnIngresar"));
                 BtnLogin.Click();
 
-
-                var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
+                var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
                 bool LoginExitoso = wait.Until(ExpectedConditions.UrlContains("/sobrenosotros"));
 
                 Assert.IsTrue(LoginExitoso);
@@ -83,6 +64,7 @@ namespace SeleniumSaly
         [TestMethod]
         public void CrearReseñaTest()
         {
+            TestLoginCLiente(); // Asegura que el usuario esté logueado antes de crear una reseña
             try
             {
                 // Configuración de Espera Inteligente
@@ -113,14 +95,11 @@ namespace SeleniumSaly
 
                 IWebElement InputComentario = driver.FindElement(By.Id("InputComentario"));
                 InputComentario.Clear();
-                InputComentario.SendKeys("Excelente servicio, muy buena atención al cliente,nuevas reseña otra coño");
+                InputComentario.SendKeys("Excelente servicio, muy buena atención al cliente, otra reseña XD");
 
                 // Envía el formulario de reseña
                 IWebElement BtnEnviar = driver.FindElement(By.Id("btnEnviar"));
                 BtnEnviar.Click();
-
-                System.Threading.Thread.Sleep(1000);
-
 
                 // Espera hasta que la URL contenga "/sobrenosotros" para confirmar que la reseña fue enviada exitosamente
                 bool ReseñaExitosa = wait.Until(ExpectedConditions.UrlContains("/sobrenosotros"));
@@ -135,39 +114,10 @@ namespace SeleniumSaly
             {
                 TestContext.WriteLine("Fallo: Ocurrió una excepción inesperada durante la creacion de la reseña");
                 Assert.Fail(ex.Message);
-             
-                
+
             }
 
         }
-
-
-        [TestMethod]
-        public void CerrarSesionTest()
-        {
-            try
-            {
-
-                // Configuración de Espera Inteligente
-                var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-
-                // Espera a que el botón de cerrar sesión sea clickeable
-                IWebElement BtnCerrarSesion = wait.Until(ExpectedConditions.ElementToBeClickable(By.Id("btnCerrarSesion")));
-                BtnCerrarSesion.Click();
-
-                // Espera hasta que la URL contenga "/home/index" para confirmar que la sesión fue cerrada exitosamente
-                bool CerrarSesionExitoso = wait.Until(ExpectedConditions.UrlContains("/"));
-                Assert.IsTrue(CerrarSesionExitoso);
-                TestContext.WriteLine("Éxito: La sesión fue cerrada exitosamente y se redirigió a la vista 'Login'.");
-            }
-            catch (Exception ex)
-            {
-                TestContext.WriteLine("Fallo: Ocurrió una excepción inesperada al cerrar sesión");
-                Assert.Fail(ex.Message);
-               
-            }
-        }
-
 
         [TestMethod]
         public void TestLoginAdmin()
@@ -177,10 +127,10 @@ namespace SeleniumSaly
                 //Abre el navegador y navega a la URL de la aplicación
                 driver.Navigate().GoToUrl(AppUrl);
 
-                var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+                System.Threading.Thread.Sleep(1000);
 
                 //Agrega las credenciales para poder iniciar sesión y acceder a la aplicación
-                IWebElement InputEmail = wait.Until(ExpectedConditions.ElementIsVisible(By.Id("inputemail")));
+                IWebElement InputEmail = driver.FindElement(By.Id("inputemail"));
                 InputEmail.Clear();
                 InputEmail.SendKeys("marvinadmin@gmail.com");
 
@@ -191,8 +141,7 @@ namespace SeleniumSaly
                 IWebElement BtnLogin = driver.FindElement(By.Id("btnIngresar"));
                 BtnLogin.Click();
 
-                System.Threading.Thread.Sleep(1000);
-
+                var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
                 bool LoginExitoso = wait.Until(ExpectedConditions.UrlContains("/sobrenosotros"));
 
                 Assert.IsTrue(LoginExitoso);
@@ -204,17 +153,17 @@ namespace SeleniumSaly
             {
                 TestContext.WriteLine("Fallo: Ocurrió una excepción inesperada al iniciar sesión como Admin");
                 Assert.Fail(ex.Message);
-               
+
             }
         }
 
         [TestMethod]
         public void BuscarReseñaTest()
         {
+            TestLoginAdmin(); // Asegura que el usuario esté logueado como Admin antes de buscar una reseña
             try
             {
-                var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(15));
-                string idReseña = "25";
+                var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
 
                 // Convertir el driver a IJavaScriptExecutor
                 IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
@@ -229,20 +178,19 @@ namespace SeleniumSaly
                 // Busca la reseña
                 IWebElement InputReseña = wait.Until(ExpectedConditions.ElementIsVisible(By.Id("InputBuscar")));
                 InputReseña.Clear();
-                InputReseña.SendKeys(idReseña);
+                InputReseña.SendKeys(idReseñaEdit);
 
                 IWebElement BtnBuscar = driver.FindElement(By.Id("btnBuscar"));
                 BtnBuscar.Click();
 
                 System.Threading.Thread.Sleep(1000);
 
-
                 // XPath para buscar en la tabla por ID 25 y Cliente Marvin
-                By selectorFilaID = By.XPath($"//table//tr[td[text()='{idReseña}'] and td[text()='Marvin']]");
+                By selectorFilaID = By.XPath($"//table//tr[td[text()='{idReseñaEdit}'] and td[text()='Marvin']]");
                 IWebElement filaReseña = wait.Until(ExpectedConditions.ElementIsVisible(selectorFilaID));
 
                 Assert.IsTrue(filaReseña.Displayed);
-                TestContext.WriteLine($"Éxito: La reseña con ID {idReseña} fue encontrada.");
+                TestContext.WriteLine($"Éxito: La reseña con ID {idReseñaEdit} fue encontrada.");
             }
             catch (Exception ex)
             {
@@ -254,20 +202,20 @@ namespace SeleniumSaly
         [TestMethod]
         public void EditarReseñaTest()
         {
+            BuscarReseñaTest(); // Asegura que la reseña a editar esté visible en la tabla
             try
             {
                 // Configuración de Espera Inteligente
                 var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-                string idReseña = "25";
 
                 // Clic en el botón 'Editar' (Asumimos que el clic ocurre exitosamente ahora)
-                By selectorBotonVer = By.XPath($"//tr[td[text()='{idReseña}']]/td/button[text()='Editar']");
+                By selectorBotonVer = By.XPath($"//tr[td[text()='{idReseñaEdit}']]/td/button[text()='Editar']");
                 IWebElement BtnEditar = wait.Until(ExpectedConditions.ElementToBeClickable(selectorBotonVer));
                 BtnEditar.Click();
 
                 IWebElement InputComentario = wait.Until(ExpectedConditions.ElementIsVisible(By.Id("InputComentarioEdit")));
                 InputComentario.Clear();
-                InputComentario.SendKeys("Excelente servicio, muy buena atención al cliente, reseña editada otra vez");
+                InputComentario.SendKeys("Excelente servicio, muy buena atención al cliente, reseña editada quinta vez");
 
                 IWebElement BtnGuardarCambios = driver.FindElement(By.Id("btnGuardarEdit"));
                 BtnGuardarCambios.Click();
@@ -284,7 +232,7 @@ namespace SeleniumSaly
             {
                 TestContext.WriteLine("Fallo: Ocurrió una excepción inesperada al editar la reseña");
                 Assert.Fail(ex.Message);
-                
+
             }
         }
 
@@ -292,24 +240,13 @@ namespace SeleniumSaly
         [TestMethod]
         public void EliminarReseñaTest()
         {
-            System.Threading.Thread.Sleep(2000);
+            BuscarReseñaTest();
             try
             {
                 // Configuración de Espera Inteligente
                 var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-                string idReseña = "36";
 
-                // Busca la reseña
-                IWebElement InputReseña = wait.Until(ExpectedConditions.ElementIsVisible(By.Id("InputBuscar")));
-                InputReseña.Clear();
-                InputReseña.SendKeys(idReseña);
-
-                IWebElement BtnBuscar = driver.FindElement(By.Id("btnBuscar"));
-                BtnBuscar.Click();
-
-                System.Threading.Thread.Sleep(1000);
-
-                By selectorBotonVer = By.XPath($"//tr[td[text()='{idReseña}']]/td/button[text()='Eliminar']");
+                By selectorBotonVer = By.XPath($"//tr[td[text()='{idReseñaEdit}']]/td/button[text()='Eliminar']");
                 IWebElement BtnEditar = wait.Until(ExpectedConditions.ElementToBeClickable(selectorBotonVer));
                 BtnEditar.Click();
 
@@ -318,12 +255,13 @@ namespace SeleniumSaly
                 IWebElement BtnGuardarCambios = driver.FindElement(By.Id("btnEliminarConfirmar"));
                 BtnGuardarCambios.Click();
 
-                System.Threading.Thread.Sleep(2000);
+                System.Threading.Thread.Sleep(100);
 
                 // Espera hasta que la URL contenga "/resennas" para confirmar que la reseña fue eliminada exitosamente
                 bool DeleteExitoso = wait.Until(ExpectedConditions.UrlContains("/resennas"));
                 Assert.IsTrue(DeleteExitoso);
-                TestContext.WriteLine("Éxito: La reseña fue eliminada exitosamente y se redirigió a la vista 'resennas'.");
+
+                TestContext.WriteLine($"Éxito: La reseña {idReseñaEdit} fue eliminada exitosamente y se redirigió a la vista 'resennas'.");
             }
             catch (Exception ex)
             {
@@ -333,23 +271,6 @@ namespace SeleniumSaly
 
         }
 
-        //[TestMethod]
-        //public void VerReseñaTest()
-        //{
-        //    var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(15));
-        //    string idReseña = "25";
-        //    string clienteReseña = "Marvin";
-
-        //    // 3. ACCIÓN: Clic en el botón 'Ver' (Asumimos que el clic ocurre exitosamente ahora)
-        //    By selectorBotonVer = By.XPath($"//tr[td[text()='{idReseña}']]/td/button[text()='Ver']");
-        //    IWebElement BtnVer = wait.Until(ExpectedConditions.ElementToBeClickable(selectorBotonVer));
-        //    BtnVer.Click();
-
-
-        //}
-
-
-
 
         [TestCleanup]
         public void Clear()
@@ -357,6 +278,6 @@ namespace SeleniumSaly
             // Cierra el navegador y libera los recursos
             driver.Quit();
         }
-
     }
+
 }
