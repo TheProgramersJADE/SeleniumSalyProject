@@ -20,90 +20,107 @@ namespace SeleniumSaly
         public void Setup()
         {
             driver = new EdgeDriver();
-            wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+            wait = new WebDriverWait(driver, TimeSpan.FromSeconds(15));
             driver.Manage().Window.Maximize();
         }
 
-        //TEST DE LOGIN TRABJADOR
-        [TestMethod]
-        public void TestLoginTrabajador()
+        // 🔹 Login visual
+        private void LoginTrabajador()
         {
-            //Abre el navegador y navega a la URL de la aplicación
-            driver.Navigate().GoToUrl(AppUrl);
-
-            System.Threading.Thread.Sleep(1000);
-
-            //Agrega las credenciales para poder iniciar sesión y acceder a la aplicación
-            IWebElement InputEmail = driver.FindElement(By.Id("inputemail"));
-            InputEmail.Clear();
-            InputEmail.SendKeys("antonio@gmail.com");
-
-            IWebElement InputPassword = driver.FindElement(By.Id("inputpassword"));
-            InputPassword.Clear();
-            InputPassword.SendKeys("12345");
-
-            IWebElement BtnLogin = driver.FindElement(By.Id("btnIngresar"));
-            BtnLogin.Click();
-
             try
             {
-                var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
-                bool LoginExitoso = wait.Until(ExpectedConditions.UrlContains("/sobrenosotros"));
+                driver.Navigate().GoToUrl(AppUrl);
 
-                Assert.IsTrue(LoginExitoso);
+                // Espera explícita hasta que el input de email esté visible
+                IWebElement inputEmail = wait.Until(ExpectedConditions.ElementIsVisible(By.Id("inputemail")));
+                inputEmail.Clear();
+                inputEmail.SendKeys("antonio@gmail.com");
 
-                TestContext.WriteLine("Éxito: El inicio de sesión fue exitoso y se redirigió a la vista 'Sobre Nosotros'.");
+                IWebElement inputPassword = driver.FindElement(By.Id("inputpassword"));
+                inputPassword.Clear();
+                inputPassword.SendKeys("12345");
 
+                IWebElement btnLogin = driver.FindElement(By.Id("btnIngresar"));
+                btnLogin.Click();
+
+                // Espera que la URL cambie a /sobrenosotros para confirmar login
+                wait.Until(ExpectedConditions.UrlContains("/sobrenosotros"));
+                TestContext.WriteLine("✅ Éxito: Login realizado correctamente.");
             }
-            catch (Exception ex)
+            catch (WebDriverTimeoutException)
             {
-                Assert.Fail($"Fallo: Ocurrió una excepción inesperada al iniciar sesión: {ex.Message}");
-
+                Assert.Fail("❌ Fallo: No se pudo iniciar sesión, elemento no encontrado o URL incorrecta.");
             }
         }
 
-        //TEST DE CREAR ASIGNACIÓN TRABAJADOR
         [TestMethod]
-        public void CrearAsignacionServicioTrabajador()
+        public void CrearAsignacionServicioTrabajadorTest()
         {
             try
             {
-                // 1️⃣ Iniciar sesión
-                TestLoginTrabajador();
+                // 1️ Login
+                LoginTrabajador();
 
-                // 2️⃣ Navegar a la página de Asignaciones
-                driver.Navigate().GoToUrl(AppUrl + "ServiciosTrabajador/servicio-trabajador");
+                // 2️ Navegar al módulo de asignaciones mediante clic (mantiene token)
+                IWebElement btnModuloAsignaciones = wait.Until(ExpectedConditions.ElementToBeClickable(
+                    By.XPath("//a[contains(@href,'ServiciosTrabajador/servicio-trabajador')]")));
+                btnModuloAsignaciones.Click();
+
+                // 3️ Esperar título del módulo
                 wait.Until(ExpectedConditions.ElementIsVisible(By.CssSelector("h3.form-title")));
 
-                // 3️⃣ Clic en "Crear Nuevo"
+                // 4️ Clic en "Crear Nuevo"
                 IWebElement btnCrearNuevo = wait.Until(ExpectedConditions.ElementToBeClickable(
                     By.XPath("//button[contains(text(),'Crear Nuevo')]")));
                 btnCrearNuevo.Click();
 
-                // 4️⃣ Seleccionar un servicio del combo
-                IWebElement selectServicio = wait.Until(ExpectedConditions.ElementIsVisible(By.TagName("selectServicio")));
-                var select = new SelectElement(selectServicio);
-                select.SelectByIndex(1); // selecciona el segundo servicio
+                // 5️ Esperar combo de servicios y seleccionar la segunda opción
+                wait.Until(driver =>
+                {
+                    try
+                    {
+                        var combo = driver.FindElement(By.Id("selectServicio"));
+                        var opciones = combo.FindElements(By.TagName("option"));
+                        if (opciones.Count > 1)
+                        {
+                            var select = new SelectElement(combo);
+                            select.SelectByIndex(1); // segunda opción
+                            return true;
+                        }
+                        return false;
+                    }
+                    catch (StaleElementReferenceException)
+                    {
+                        return false;
+                    }
+                    catch (NoSuchElementException)
+                    {
+                        return false;
+                    }
+                });
 
-                // 5️⃣ Clic en "Guardar"
+                // 6️ Clic en "Guardar"
                 IWebElement btnGuardar = wait.Until(ExpectedConditions.ElementToBeClickable(
                     By.XPath("//button[contains(text(),'Guardar')]")));
                 btnGuardar.Click();
 
-                // 6️⃣ Esperar mensaje de confirmación
-                IWebElement mensaje = wait.Until(ExpectedConditions.ElementIsVisible(
-                    By.XPath("//p[contains(text(),'Registro creado correctamente')]")));
+                // 7️ Esperar mensaje de éxito
+                IWebElement mensaje = wait.Until(ExpectedConditions.ElementIsVisible(By.Id("mensajeExito")));
 
-                // 7️⃣ Validar resultado
-                Assert.IsTrue(mensaje.Displayed, "No se mostró el mensaje de éxito.");
-                TestContext.WriteLine("✅ Éxito: La asignación servicio-trabajador fue creada correctamente.");
+                // 8️ Validar mensaje
+                Assert.IsTrue(mensaje.Displayed && mensaje.Text.Contains("Registro creado correctamente"),
+                    "❌ No se mostró el mensaje de éxito.");
 
+                TestContext.WriteLine("✅ Éxito: La asignación servicio–trabajador fue creada correctamente.");
             }
             catch (Exception ex)
             {
-                Assert.Fail($"❌ Fallo en la prueba de creación de asignación: {ex.Message}");
+                Assert.Fail($"❌ Fallo durante la creación de asignación: {ex.Message}");
             }
         }
+
+
+
 
         [TestCleanup]
         public void Clear()
