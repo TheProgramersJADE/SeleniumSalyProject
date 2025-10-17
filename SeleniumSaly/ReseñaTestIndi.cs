@@ -70,10 +70,8 @@ namespace SeleniumSaly
                 // Configuración de Espera Inteligente
                 var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
 
-                // Convertir el driver a IJavaScriptExecutor
                 IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
 
-                // Disminuir el zoom al 50% para alejar la página
                 js.ExecuteScript("document.body.style.zoom = '0.5'");
 
                 // Espera a que el botón de reseña sea clickeable en la vista "/sobrenosotros"

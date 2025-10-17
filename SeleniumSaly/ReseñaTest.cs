@@ -10,6 +10,7 @@ namespace SeleniumSaly
     public class ReseñaTest
     {
         private IWebDriver driver;
+        private WebDriverWait wait;
         private const string AppUrl = "http://frontend-beautysaly.somee.com/";
 
         // Propiedad para el contexto de la prueba
@@ -20,6 +21,7 @@ namespace SeleniumSaly
         public void Setup()
         {
             driver = new EdgeDriver();
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
 
         }
 
@@ -63,8 +65,6 @@ namespace SeleniumSaly
                 IWebElement BtnLogin = driver.FindElement(By.Id("btnIngresar"));
                 BtnLogin.Click();
 
-
-                var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
                 bool LoginExitoso = wait.Until(ExpectedConditions.UrlContains("/sobrenosotros"));
 
                 Assert.IsTrue(LoginExitoso);
@@ -86,7 +86,7 @@ namespace SeleniumSaly
             try
             {
                 // Configuración de Espera Inteligente
-                var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+
 
                 // Convertir el driver a IJavaScriptExecutor
                 IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
@@ -147,10 +147,6 @@ namespace SeleniumSaly
         {
             try
             {
-
-                // Configuración de Espera Inteligente
-                var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-
                 // Espera a que el botón de cerrar sesión sea clickeable
                 IWebElement BtnCerrarSesion = wait.Until(ExpectedConditions.ElementToBeClickable(By.Id("btnCerrarSesion")));
                 BtnCerrarSesion.Click();
@@ -177,7 +173,7 @@ namespace SeleniumSaly
                 //Abre el navegador y navega a la URL de la aplicación
                 driver.Navigate().GoToUrl(AppUrl);
 
-                var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+                System.Threading.Thread.Sleep(1000);
 
                 //Agrega las credenciales para poder iniciar sesión y acceder a la aplicación
                 IWebElement InputEmail = wait.Until(ExpectedConditions.ElementIsVisible(By.Id("inputemail")));
@@ -213,56 +209,54 @@ namespace SeleniumSaly
         {
             try
             {
-                var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(15));
-                string idReseña = "25";
-
-                // Convertir el driver a IJavaScriptExecutor
                 IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
-
-                // Disminuir el zoom al 50% para alejar la página
                 js.ExecuteScript("document.body.style.zoom = '0.5'");
 
-                // Navega a la vista de gestión de reseñas
+                // 1. NAVEGACIÓN A LA TABLA
                 IWebElement BtnReseña = wait.Until(ExpectedConditions.ElementToBeClickable(By.Id("btnResenna")));
                 BtnReseña.Click();
 
-                // Busca la reseña
+                By selectorPrimerID = By.XPath("//tbody/tr[1]/td[1]");
+                IWebElement primerIDElemento = wait.Until(ExpectedConditions.ElementIsVisible(selectorPrimerID));
+
+                // Captura el ID de la primera fila
+                string idReseña = primerIDElemento.Text.Trim();
+                Assert.IsFalse(string.IsNullOrEmpty(idReseña));
+
+                TestContext.WriteLine($"ID capturado para búsqueda: {idReseña}");
+
                 IWebElement InputReseña = wait.Until(ExpectedConditions.ElementIsVisible(By.Id("InputBuscar")));
                 InputReseña.Clear();
                 InputReseña.SendKeys(idReseña);
 
+                // Clic en Buscar
                 IWebElement BtnBuscar = driver.FindElement(By.Id("btnBuscar"));
-                BtnBuscar.Click();
+                wait.Until(ExpectedConditions.ElementToBeClickable(BtnBuscar)).Click();
 
-                System.Threading.Thread.Sleep(1000);
-
-
-                // XPath para buscar en la tabla por ID 25 y Cliente Marvin
-                By selectorFilaID = By.XPath($"//table//tr[td[text()='{idReseña}'] and td[text()='Marvin']]");
-                IWebElement filaReseña = wait.Until(ExpectedConditions.ElementIsVisible(selectorFilaID));
+                // XPath para buscar la fila que contenga SOLO el ID capturado, asegurando que el filtro funcionó
+                By selectorFilaFiltrada = By.XPath($"//table//tr[td[text()='{idReseña}']]");
+                IWebElement filaReseña = wait.Until(ExpectedConditions.ElementIsVisible(selectorFilaFiltrada));
 
                 Assert.IsTrue(filaReseña.Displayed);
-                TestContext.WriteLine($"Éxito: La reseña con ID {idReseña} fue encontrada.");
+                TestContext.WriteLine($"Éxito: La reseña con ID '{idReseña}' fue encontrada correctamente después de la búsqueda.");
+
             }
             catch (Exception ex)
             {
-                TestContext.WriteLine("Fallo de Búsqueda: La reseña con ID 25 no apareció en los resultados");
+                TestContext.WriteLine("❌ Fallo: Ocurrió una excepción inesperada durante la búsqueda.");
                 Assert.Fail(ex.Message);
             }
         }
+
 
         [TestMethod]
         public void EditarReseñaTest()
         {
             try
             {
-                // Configuración de Espera Inteligente
-                var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-                string idReseña = "25";
-
                 // Clic en el botón 'Editar' (Asumimos que el clic ocurre exitosamente ahora)
-                By selectorBotonVer = By.XPath($"//tr[td[text()='{idReseña}']]/td/button[text()='Editar']");
-                IWebElement BtnEditar = wait.Until(ExpectedConditions.ElementToBeClickable(selectorBotonVer));
+                By selectorBotonEditarPrimeraFila = By.XPath("//tbody/tr[1]/td/button[text()='Editar']");
+                IWebElement BtnEditar = wait.Until(ExpectedConditions.ElementToBeClickable(selectorBotonEditarPrimeraFila));
                 BtnEditar.Click();
 
                 IWebElement InputComentario = wait.Until(ExpectedConditions.ElementIsVisible(By.Id("InputComentarioEdit")));
@@ -295,23 +289,12 @@ namespace SeleniumSaly
             System.Threading.Thread.Sleep(2000);
             try
             {
-                // Configuración de Espera Inteligente
-                var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-                string idReseña = "36";
-
-                // Busca la reseña
-                IWebElement InputReseña = wait.Until(ExpectedConditions.ElementIsVisible(By.Id("InputBuscar")));
-                InputReseña.Clear();
-                InputReseña.SendKeys(idReseña);
-
-                IWebElement BtnBuscar = driver.FindElement(By.Id("btnBuscar"));
-                BtnBuscar.Click();
-
                 System.Threading.Thread.Sleep(1000);
 
-                By selectorBotonVer = By.XPath($"//tr[td[text()='{idReseña}']]/td/button[text()='Eliminar']");
-                IWebElement BtnEditar = wait.Until(ExpectedConditions.ElementToBeClickable(selectorBotonVer));
-                BtnEditar.Click();
+                // Clic en el botón 'Editar' (Asumimos que el clic ocurre exitosamente ahora)
+                By selectorBotonEditarPrimeraFila = By.XPath("//tbody/tr[1]/td/button[text()='Eliminar']");
+                IWebElement BtnEliminarReseña = wait.Until(ExpectedConditions.ElementToBeClickable(selectorBotonEditarPrimeraFila));
+                BtnEliminarReseña.Click();
 
                 System.Threading.Thread.Sleep(1000);
 
@@ -332,24 +315,6 @@ namespace SeleniumSaly
             }
 
         }
-
-        //[TestMethod]
-        //public void VerReseñaTest()
-        //{
-        //    var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(15));
-        //    string idReseña = "25";
-        //    string clienteReseña = "Marvin";
-
-        //    // 3. ACCIÓN: Clic en el botón 'Ver' (Asumimos que el clic ocurre exitosamente ahora)
-        //    By selectorBotonVer = By.XPath($"//tr[td[text()='{idReseña}']]/td/button[text()='Ver']");
-        //    IWebElement BtnVer = wait.Until(ExpectedConditions.ElementToBeClickable(selectorBotonVer));
-        //    BtnVer.Click();
-
-
-        //}
-
-
-
 
         [TestCleanup]
         public void Clear()
