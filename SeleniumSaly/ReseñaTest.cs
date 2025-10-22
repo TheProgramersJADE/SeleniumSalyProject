@@ -21,7 +21,7 @@ namespace SeleniumSaly
         public void Setup()
         {
             driver = new EdgeDriver();
-            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+            wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
 
         }
 
@@ -29,17 +29,11 @@ namespace SeleniumSaly
         public void TestEjecutarTodo()
         {
             TestLoginCLiente();
-
             CrearReseñaTest();
-
             CerrarSesionTest();
-
             TestLoginAdmin();
-
             BuscarReseñaTest();
-
             EditarReseñaTest();
-
             EliminarReseñaTest();
         }
 
@@ -51,7 +45,7 @@ namespace SeleniumSaly
                 //Abre el navegador y navega a la URL de la aplicación
                 driver.Navigate().GoToUrl(AppUrl);
 
-                System.Threading.Thread.Sleep(1000);
+                System.Threading.Thread.Sleep(2000);
 
                 //Agrega las credenciales para poder iniciar sesión y acceder a la aplicación
                 IWebElement InputEmail = driver.FindElement(By.Id("inputemail"));
@@ -62,11 +56,11 @@ namespace SeleniumSaly
                 InputPassword.Clear();
                 InputPassword.SendKeys("12345");
 
+
                 IWebElement BtnLogin = driver.FindElement(By.Id("btnIngresar"));
                 BtnLogin.Click();
 
                 bool LoginExitoso = wait.Until(ExpectedConditions.UrlContains("/sobrenosotros"));
-
                 Assert.IsTrue(LoginExitoso);
 
                 TestContext.WriteLine("Éxito: El inicio de sesión como cliente fue exitoso y se redirigió a la vista 'Sobre Nosotros'.");
@@ -85,8 +79,6 @@ namespace SeleniumSaly
         {
             try
             {
-                // Configuración de Espera Inteligente
-
 
                 // Convertir el driver a IJavaScriptExecutor
                 IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
@@ -121,7 +113,6 @@ namespace SeleniumSaly
 
                 System.Threading.Thread.Sleep(1000);
 
-
                 // Espera hasta que la URL contenga "/sobrenosotros" para confirmar que la reseña fue enviada exitosamente
                 bool ReseñaExitosa = wait.Until(ExpectedConditions.UrlContains("/sobrenosotros"));
 
@@ -136,7 +127,6 @@ namespace SeleniumSaly
                 TestContext.WriteLine("Fallo: Ocurrió una excepción inesperada durante la creacion de la reseña");
                 Assert.Fail(ex.Message);
              
-                
             }
 
         }
@@ -212,7 +202,7 @@ namespace SeleniumSaly
                 IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
                 js.ExecuteScript("document.body.style.zoom = '0.5'");
 
-                // 1. NAVEGACIÓN A LA TABLA
+                // Navega a la vista de reseñas
                 IWebElement BtnReseña = wait.Until(ExpectedConditions.ElementToBeClickable(By.Id("btnResenna")));
                 BtnReseña.Click();
 

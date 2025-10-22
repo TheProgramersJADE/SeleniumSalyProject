@@ -36,6 +36,14 @@ namespace SeleniumSaly
         }
 
         [TestMethod]
+        public void EjecutarCrearAsignacionServicioTrabjadorTest()
+        {
+            TestLoginTrabajador();
+            CrearAsignacionServicioTrabajadorTest();
+        }
+
+
+        [TestMethod]
         public void TestLoginTrabajador()
         {
             try
