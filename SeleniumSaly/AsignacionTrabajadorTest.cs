@@ -94,7 +94,7 @@ namespace SeleniumSaly
                 IWebElement btnCrearNuevo = wait.Until(ExpectedConditions.ElementToBeClickable(By.Id("btnCrearAsignacion")));
                 btnCrearNuevo.Click();
 
-                System.Threading.Thread.Sleep(1000);
+                System.Threading.Thread.Sleep(3000);
 
                 // Seleccionar una opción aleatoria del ComboBox
                 By selectorComboBox = By.Id("btnCombobox");
